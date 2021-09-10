@@ -24,6 +24,10 @@ display_shortcuts() {
     };'
 }
 
+strip_colors() {
+    sed -E "s/\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g"
+}
+
 format_shortcuts() {
     awk -F':' '
     {
@@ -44,6 +48,6 @@ END
     chmod +x "${SHORTCUT_CMD_PATH}"
 }
 
-rg --color=always --with-filename --line-number "$@" | tee >/dev/null >(display_shortcuts) >(format_shortcuts > "${SHORTCUTS_MATCHES_FILE}");
+rg --color=always --with-filename --line-number "$@" | tee >/dev/null >(display_shortcuts) >(strip_colors | format_shortcuts > "${SHORTCUTS_MATCHES_FILE}");
 
 create_shortcut_cmd
