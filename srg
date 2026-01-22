@@ -47,7 +47,7 @@ MATCH_FILE=$(echo "$MATCH" | sed 's/'"$MATCH_LINE"' //')
 EDITOR_CMD="${EDITOR:-vim}"
 
 # Extract the base command name (remove path and get just the executable name)
-EDITOR_NAME=$(basename "$EDITOR_CMD" | cut -d' ' -f1)
+EDITOR_NAME=$(basename "$EDITOR_CMD")
 
 # Open the file with the appropriate syntax for each editor
 case "$EDITOR_NAME" in
