@@ -36,40 +36,43 @@ format_shortcuts() {
 }
 
 create_shortcut_cmd() {
-    cat > "${SHORTCUT_CMD_PATH}" <<'END'
+    cat > "${SHORTCUT_CMD_PATH}" <<END
 #!/bin/bash
 
-MATCH=$(sed -n "$1p" < ~/.srgmatches)
-MATCH_LINE=$(echo "$MATCH" | cut -d" " -f1)
-MATCH_FILE=$(echo "$MATCH" | sed 's/'"$MATCH_LINE"' //')
+MATCH=\$(sed -n "\$1p" < ${SHORTCUTS_MATCHES_FILE})
+MATCH_LINE=\$(echo "\$MATCH" | cut -d" " -f1)
+MATCH_FILE=\$(echo "\$MATCH" | sed 's/'"\$MATCH_LINE"' //')
 
 # Determine the editor to use (default to vim)
-EDITOR_CMD="${EDITOR:-vim}"
+EDITOR_STR="\${EDITOR:-vim}"
+
+# Parse editor command into an array to handle arguments properly
+read -ra EDITOR_CMD <<< "\$EDITOR_STR"
 
 # Extract the base command name (remove path and get just the executable name)
-EDITOR_NAME=$(basename "$EDITOR_CMD")
+EDITOR_NAME=\$(basename "\${EDITOR_CMD[0]}")
 
 # Open the file with the appropriate syntax for each editor
-case "$EDITOR_NAME" in
+case "\$EDITOR_NAME" in
     vim|vi|nvim|neovim)
         # vim, neovim: +line filename
-        "$EDITOR_CMD" +"$MATCH_LINE" "$MATCH_FILE"
+        "\${EDITOR_CMD[@]}" +"\$MATCH_LINE" "\$MATCH_FILE"
         ;;
     nano|pico)
         # nano, pico: +line filename
-        "$EDITOR_CMD" +"$MATCH_LINE" "$MATCH_FILE"
+        "\${EDITOR_CMD[@]}" +"\$MATCH_LINE" "\$MATCH_FILE"
         ;;
     emacs)
         # emacs: +line filename
-        "$EDITOR_CMD" +"$MATCH_LINE" "$MATCH_FILE"
+        "\${EDITOR_CMD[@]}" +"\$MATCH_LINE" "\$MATCH_FILE"
         ;;
     code)
         # VS Code: --goto filename:line
-        "$EDITOR_CMD" --goto "$MATCH_FILE:$MATCH_LINE"
+        "\${EDITOR_CMD[@]}" --goto "\$MATCH_FILE:\$MATCH_LINE"
         ;;
     *)
         # Default fallback - try the +line syntax
-        "$EDITOR_CMD" +"$MATCH_LINE" "$MATCH_FILE"
+        "\${EDITOR_CMD[@]}" +"\$MATCH_LINE" "\$MATCH_FILE"
         ;;
 esac
 END
